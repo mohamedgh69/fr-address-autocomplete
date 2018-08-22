@@ -1,0 +1,107 @@
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        var destinations = new Bloodhound(
+            {
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote : {
+                    url : 'https://api-adresse.data.gouv.fr/search/?q=%QUERY',
+                    wildcard : '%QUERY',
+                    transform: function (res) {
+                        return res.features;
+                    }
+                },
+                rateLimitWait: 300,
+            });
+        $('#address_to').typeahead(
+            {
+                hint: false,
+                highlight: true,
+                minLength: 2,
+            },
+            {
+                display :  function(data){return data.properties.name+', '+data.properties.city+' ('+data.properties.citycode+')';},
+                source : destinations,
+                limit: 5,
+                templates : {
+                    empty : [ '<p class="tt-suggestion tt-selectable">'+ dest_not_found + '</p>' ].join('\n'),
+                    pending :['<i class="fas fa-sync fa-spin"></i>'],
+                    suggestion : function(data) {
+                        switch(data.properties.type) {
+                            case 'city':
+                                var text= 'building';
+                                break;
+                            case 'housenumber':
+                                var text= 'home';
+                                break;
+                            case 'district':
+                                var text = 'industry';
+                                break;
+                            case 'municipality':
+                                var text = 'building';
+                                break;
+                            case 'street':
+                                var text = 'road';
+                                break;
+                            case 'region':
+                                var text = 'map-marker';
+                                break;
+                            default:
+                                var text= 'map-marker';
+                                break;
+                        };
+                        return '<p><i class="fa fa-'+text+' " style="text-align:center;font-size:20px;position:relative;left:-10px;top:0;width:30px"></i>&nbsp;' + data.properties.name+', '+data.properties.city+'('+data.properties.citycode+')'+ '</p>';
+                    }
+                }
+            }).on('typeahead:selected', function(obj, datum) {
+            $('#address_to').val(datum.properties.name+', '+datum.properties.city+' ('+datum.properties.citycode+')');
+            $('#address_to_lat').val(datum.geometry.coordinates['1']);
+            $('#address_to_lng').val(datum.geometry.coordinates['0']);
+        });
+        $('#address_from').typeahead(
+            {
+                hint: false,
+                highlight: false,
+                minLength: 2,
+            },
+            {
+                display :  function(data){return data.properties.name+', '+data.properties.city+' ('+data.properties.citycode+')'; },
+                source : destinations,
+                limit: 5,
+                templates : {
+                    empty : [ '<p class="tt-suggestion tt-selectable">'+ dest_not_found + '</p>' ].join('\n'),
+                    pending :['<i class="fas fa-sync fa-spin"></i>'],
+                    suggestion : function(data) {
+                        switch(data.properties.type) {
+                            case 'city':
+                                var text= 'building';
+                                break;
+                            case 'housenumber':
+                                var text= 'home';
+                                break;
+                            case 'district':
+                                var text = 'industry';
+                                break;
+                            case 'municipality':
+                                var text = 'building';
+                                break;
+                            case 'street':
+                                var text = 'road';
+                                break;
+                            case 'region':
+                                var text = 'map-marker';
+                                break;
+                            default:
+                                var text= 'map-marker';
+                                break;
+                        };
+                        return '<p><i class="fa fa-'+text+'" style="text-align:center;font-size:20px;position:relative;left:-10px;top:0;width:30px"></i>&nbsp;' + data.properties.name+', '+data.properties.city+' ('+data.properties.citycode+')'+ '</p>';
+                    }
+                }
+            }).on('typeahead:selected', function(obj, datum) {
+            $('#address_from').val(datum.properties.name+', '+datum.properties.city+' ('+datum.properties.citycode+')');
+            $('#address_from_lat').val(datum.geometry.coordinates['1']);
+            $('#address_from_lng').val(datum.geometry.coordinates['0']);
+        });
+    })
+</script>
